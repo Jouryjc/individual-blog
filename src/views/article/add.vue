@@ -1,9 +1,20 @@
 <template>
-    <div>
+    <div >
         <div id="editor">
             <textarea :value="input" @input="update"></textarea>
             <div v-html="compiledMarkdown"></div>
         </div>
+        <div class="app-container">
+        <el-form ref="form" label-width="50px">
+          <el-form-item label="标题">
+            <el-input v-model="form.name"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="onSubmit">发布</el-button>
+            <el-button @click="onCancel">草稿</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
     </div>
 </template>
 
@@ -14,8 +25,11 @@ import lodash from "lodash";
 export default {
   data() {
     return {
-      input: "# Welcome JuneOrange  Blog"
-    }
+      input: `# 支持MarkDown语法`,
+      form: {
+        name: ""
+      }
+    };
   },
   computed: {
     compiledMarkdown: function() {
@@ -23,9 +37,30 @@ export default {
     }
   },
   methods: {
-    update: _.debounce(function (e) {
-      this.input = e.target.value
-    }, 300)
+    update: _.debounce(function(e) {
+      this.input = e.target.value;
+    }, 300),
+    onSubmit() {
+      this.addParam = {
+        title: this.form.name,
+        content: this.input
+      }
+      this.$store.dispatch("AddArticle", this.addParam).then((response) => {
+        if(response.status == 0) {
+            this.$notify({
+              title: "成功",
+              message: "添加成功",
+              type: "success",
+              duration: 2000
+            });
+        }
+      }).catch((e) => {
+        console.log(e)
+      })
+    },
+    onCancel() {
+      console.log("cancle")
+    }
   }
 };
 </script>
